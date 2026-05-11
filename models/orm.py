@@ -40,6 +40,8 @@ class Message(Base):
     conversation_id = Column(PGUUID(as_uuid=True), ForeignKey("conversations.id"), nullable=False)
     role = Column(String(20), nullable=False)
     content = Column(Text, nullable=False)
+    status = Column(String(20), nullable=False, server_default="completed")
+    error_message = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     conversation = relationship("Conversation", back_populates="messages")

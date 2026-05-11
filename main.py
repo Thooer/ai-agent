@@ -1,21 +1,23 @@
 """FastAPI application entry point."""
 
+import logging
+import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from core.config import CORS_ORIGINS, APP_HOST, APP_PORT
-from core.database import engine, Base
 from core.redis_client import get_redis, close_redis
 from routers import users, conversations, messages, ai_chat
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    await get_redis()  # warm up connection
+    await get_redis()
     yield
     await close_redis()
 
@@ -30,11 +32,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routers
 app.include_router(users.router)
 app.include_router(conversations.router)
 app.include_router(messages.router)
 app.include_router(ai_chat.router)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    request_id = str(uuid.uuid4())
+    logger.exception("Unhandled exception request_id=%s path=%s", request_id, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error", "request_id": request_id},
+    )
 
 
 @app.get("/health")

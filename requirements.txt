@@ -2,6 +2,8 @@ fastapi
 uvicorn[standard]
 sqlalchemy[asyncio]
 asyncpg
+psycopg2-binary
+alembic
 python-dotenv
 httpx
 redis[hiredis]==7.4.0

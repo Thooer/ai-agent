@@ -1,7 +1,8 @@
 """Pydantic schemas for request/response models."""
 
+import json
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, ConfigDict
@@ -69,3 +70,22 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage]
     conversation_id: Optional[UUID] = None
     user_id: Optional[UUID] = None
+
+
+# SSE event schema — type-based, no legacy format
+class SseDelta(BaseModel):
+    type: Literal["delta"] = "delta"
+    content: str
+
+
+class SseDone(BaseModel):
+    type: Literal["done"] = "done"
+
+
+class SseError(BaseModel):
+    type: Literal["error"] = "error"
+    message: str
+
+
+def sse(model: BaseModel) -> str:
+    return f"data: {model.model_dump_json()}\n\n"
