@@ -10,7 +10,7 @@
           {
             "id": "f10ffd99dc9094ce",
             "type": "tabs",
-            "dimension": 51.245551601423486,
+            "dimension": 49.57854406130268,
             "children": [
               {
                 "id": "d207bd19095c7969",
@@ -29,7 +29,7 @@
           {
             "id": "6cc14ddc3d30b4df",
             "type": "tabs",
-            "dimension": 48.754448398576514,
+            "dimension": 50.42145593869732,
             "children": [
               {
                 "id": "68e3a3133ea97a5f",
@@ -37,12 +37,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "Concept/Memory.md",
+                    "file": "Concept/Embedding.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "Memory"
+                  "title": "Embedding"
                 }
               }
             ]
@@ -207,9 +207,27 @@
       "bases:Create new base": false
     }
   },
-  "active": "d207bd19095c7969",
+  "active": "68e3a3133ea97a5f",
   "lastOpenFiles": [
+    "阶段一/Redis集成.md.tmp.7504.1778333397873",
+    "阶段一/Redis集成.md.tmp.7504.1778331187992",
+    "阶段一/Redis集成.md",
+    "阶段一",
     "Concept/Memory.md",
+    "Plan/grok.md",
+    "Plan/gpt.md",
+    "Plan/Situation.md",
+    "Plan/Claude.md",
+    "Plan/ArchitectureDiscuss.md",
+    "Plan",
+    "Concept/Plan/grok.md",
+    "Concept/Plan/gpt.md",
+    "Concept/Plan/Situation.md",
+    "Concept/Plan/Claude.md",
+    "Concept/Plan/ArchitectureDiscuss.md",
+    "Concept/Plan",
+    "Plan/ArchitectureDebate.md",
+    "Plan/Architecture.md",
     "Concept/FastAPI.md",
     "Concept/Agent loop.md",
     "Concept/Qdrant.md",
@@ -222,20 +240,6 @@
     "Concept/LangGraph.md",
     "Inbox/tmp.md",
     "Inbox",
-    "Concept/Context Window.md",
-    "Concept/上下文窗口.md",
-    "Concept/Token.md",
-    "Concept/Structured Output.md",
-    "Concept/temperature.md",
-    "Concept/RAG.md",
-    "Concept/Redis.md",
-    "Concept/Prompt Engineering.md",
-    "Concept/Evaluation.md",
-    "Concept/Function Calling Tool Calling.md",
-    "Concept/Embedding.md",
-    "Concept",
-    "上下文窗口.md",
-    "temperature.md",
-    "Token.md"
+    "Concept"
   ]
 }

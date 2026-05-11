@@ -22,7 +22,7 @@ async def stream_chat(messages: list[dict]) -> AsyncGenerator[str, None]:
         "stream": True,
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(trust_env=False) as client:
         async with client.stream(
             "POST",
             f"{BIGMODEL_BASE_URL}/chat/completions",

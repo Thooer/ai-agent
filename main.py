@@ -7,15 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import CORS_ORIGINS, APP_HOST, APP_PORT
 from core.database import engine, Base
+from core.redis_client import get_redis, close_redis
 from routers import users, conversations, messages, ai_chat
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create database tables on startup."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    await get_redis()  # warm up connection
     yield
+    await close_redis()
 
 
 app = FastAPI(lifespan=lifespan)
