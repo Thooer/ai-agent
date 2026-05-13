@@ -1,8 +1,10 @@
 """AI chat routes with streaming."""
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
+from core.security import get_current_user
+from models.orm import User
 from schemas.dto import ChatRequest, SseDelta, SseDone, SseError, sse
 from services.llm import stream_chat, LLMError
 from services.message_saver import save_chat_messages
@@ -12,13 +14,15 @@ router = APIRouter(prefix="/ai", tags=["ai"])
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
-    if await is_rate_limited(str(request.user_id)):
+async def chat(
+    request: ChatRequest,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+):
+    if await is_rate_limited(str(current_user.id)):
         raise HTTPException(status_code=429, detail="Rate limit exceeded. Max 50 requests per minute.")
 
     messages = [{"role": m.role, "content": m.content} for m in request.messages]
-    user_id = request.user_id
-    conversation_id = request.conversation_id
     user_message = request.messages[-1].content if request.messages else ""
 
     async def event_generator():
@@ -38,8 +42,8 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
 
         background_tasks.add_task(
             save_chat_messages,
-            user_id=user_id,
-            conversation_id=conversation_id,
+            user_id=current_user.id,
+            conversation_id=request.conversation_id,
             user_message=user_message,
             assistant_content="".join(collected),
             status=final_status,

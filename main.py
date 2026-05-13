@@ -8,10 +8,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from core.config import CORS_ORIGINS, APP_HOST, APP_PORT
+from core.config import CORS_ORIGINS, APP_HOST, APP_PORT, LOG_LEVEL
+from core.logging import setup_logging
+from core.middleware import RequestIdMiddleware
 from core.redis_client import get_redis, close_redis
-from routers import users, conversations, messages, ai_chat
+from routers import users, conversations, messages, ai_chat, auth
 
+setup_logging(LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
 
@@ -24,6 +27,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(RequestIdMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -32,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(conversations.router)
 app.include_router(messages.router)

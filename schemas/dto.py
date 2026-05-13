@@ -69,7 +69,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[ChatMessage]
     conversation_id: Optional[UUID] = None
-    user_id: Optional[UUID] = None
+    use_rag: bool = True
 
 
 # SSE event schema — type-based, no legacy format

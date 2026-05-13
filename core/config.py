@@ -23,3 +23,9 @@ APP_PORT = int(os.getenv("APP_PORT", "8000"))
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 REDIS_PROJECT_PREFIX = os.getenv("REDIS_PROJECT_PREFIX", "ai-agent:dev")
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRE_DAYS = int(os.getenv("JWT_EXPIRE_DAYS", "7"))

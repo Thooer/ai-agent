@@ -8,3 +8,6 @@ python-dotenv
 httpx
 redis[hiredis]==7.4.0
 msgpack==1.1.2
+pgvector
+python-jose[cryptography]
+bcrypt
