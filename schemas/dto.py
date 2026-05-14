@@ -80,6 +80,7 @@ class SseDelta(BaseModel):
 
 class SseDone(BaseModel):
     type: Literal["done"] = "done"
+    citations: list[dict] = []
 
 
 class SseError(BaseModel):
@@ -87,5 +88,31 @@ class SseError(BaseModel):
     message: str
 
 
+class SseRetrievalStart(BaseModel):
+    type: Literal["retrieval_start"] = "retrieval_start"
+
+
+class SseRetrievalDone(BaseModel):
+    type: Literal["retrieval_done"] = "retrieval_done"
+    chunk_count: int
+
+
 def sse(model: BaseModel) -> str:
     return f"data: {model.model_dump_json()}\n\n"
+
+
+class DocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    name: str
+    file_type: str
+    chunk_count: int
+    created_at: datetime
+
+
+class UploadResponse(BaseModel):
+    doc_id: UUID
+    task_id: str
+    message: str

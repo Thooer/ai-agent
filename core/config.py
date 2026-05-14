@@ -29,3 +29,15 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_DAYS = int(os.getenv("JWT_EXPIRE_DAYS", "7"))
+
+# RAG
+CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "512"))
+CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "64"))
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "embedding-3")
+EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "1024"))
+EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", "32"))
+VECTOR_TOP_K = int(os.getenv("VECTOR_TOP_K", "10"))
+BM25_TOP_K = int(os.getenv("BM25_TOP_K", "10"))
+RRF_K = int(os.getenv("RRF_K", "60"))
+FINAL_TOP_K = int(os.getenv("FINAL_TOP_K", "5"))
+RAG_RELEVANCE_THRESHOLD = float(os.getenv("RAG_RELEVANCE_THRESHOLD", "0.3"))

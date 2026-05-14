@@ -11,3 +11,7 @@ msgpack==1.1.2
 pgvector
 python-jose[cryptography]
 bcrypt
+tiktoken
+rank-bm25
+pymupdf
+python-multipart
