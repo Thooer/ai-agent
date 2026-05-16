@@ -1,5 +1,7 @@
 # RRF Hybrid Search
 
+> **状态：✅ 已完成**
+
 向量检索 + BM25 两路结果，用 RRF（Reciprocal Rank Fusion）融合，返回 final top-k。
 
 ---

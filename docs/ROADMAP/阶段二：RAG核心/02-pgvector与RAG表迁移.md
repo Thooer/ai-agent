@@ -1,5 +1,7 @@
 # pgvector + RAG 表迁移
 
+> **状态：✅ 已完成**
+
 为 RAG 新建 documents / chunks 两张表，并初始化 pgvector 扩展。
 
 ---

@@ -1,5 +1,7 @@
 # Chat 接入 RAG Context
 
+> **状态：✅ 已完成**
+
 把 hybrid search 的结果注入 LLM system prompt，返回带引用来源的回答。
 
 ---

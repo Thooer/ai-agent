@@ -1,5 +1,7 @@
 # Ingestion Pipeline
 
+> **状态：✅ 已完成**
+
 文档解析 → chunking → embedding → pgvector 入库，全程异步，Redis 报进度。
 
 ---
