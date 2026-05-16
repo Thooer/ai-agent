@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ai-agent-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-thooer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-thooer123}
+      POSTGRES_DB: ${POSTGRES_DB:-ai_agent}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-thooer} -d ${POSTGRES_DB:-ai_agent}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-agent-redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy volatile-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-agent-backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-thooer}:${POSTGRES_PASSWORD:-thooer123}@postgres:5432/${POSTGRES_DB:-ai_agent}
+      REDIS_URL: redis://redis:6379/0
+      APP_HOST: 0.0.0.0
+      CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-agent-migration
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-thooer}:${POSTGRES_PASSWORD:-thooer123}@postgres:5432/${POSTGRES_DB:-ai_agent}
+    command: alembic upgrade head
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: ai-agent-frontend
+    environment:
+      PYTHON_API_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

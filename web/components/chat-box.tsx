@@ -1,16 +1,19 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { fetchMessages, deleteMessage, streamChat, type Conversation, type User, type Message } from '@/lib/api';
+import { fetchMessages, deleteMessage, streamChat, type Citation, type Conversation, type User, type Message } from '@/lib/api';
 
 interface ChatBoxProps {
   user: User | null;
   conversation: Conversation | null;
 }
 
+type ChatMessage = { role: string; content: string; id?: string; citations?: Citation[] };
+
 export function ChatBox({ user, conversation }: ChatBoxProps) {
-  const [messages, setMessages] = useState<{ role: string; content: string; id?: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [retrieving, setRetrieving] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,37 +55,51 @@ export function ChatBox({ user, conversation }: ChatBoxProps) {
     const userContent = input;
     setInput('');
 
-    // 添加用户消息
     setMessages(prev => [...prev, { role: 'user', content: userContent }]);
 
     try {
       let assistantContent = '';
-
-      // 构建消息历史（使用 functional update 获取最新状态）
+      let finalCitations: Citation[] = [];
       const currentMessages = [...messages, { role: 'user', content: userContent }];
 
-      for await (const chunk of streamChat(
+      for await (const event of streamChat(
         currentMessages.map((m) => ({ role: m.role, content: m.content })),
         conversation.id,
-        user.id
       )) {
-        assistantContent += chunk;
-
-        // 使用 functional update 避免闭包问题
-        setMessages(prev => {
-          const withoutLast = prev[prev.length - 1]?.role === 'assistant'
-            ? prev.slice(0, -1)
-            : prev;
-          return [...withoutLast, { role: 'assistant', content: assistantContent }];
-        });
+        if (event.type === 'retrieval_start') {
+          setRetrieving(true);
+        } else if (event.type === 'retrieval_done') {
+          setRetrieving(false);
+        } else if (event.type === 'delta') {
+          assistantContent += event.content;
+          setMessages(prev => {
+            const withoutLast = prev[prev.length - 1]?.role === 'assistant'
+              ? prev.slice(0, -1)
+              : prev;
+            return [...withoutLast, { role: 'assistant', content: assistantContent }];
+          });
+        } else if (event.type === 'done') {
+          finalCitations = event.citations;
+          if (finalCitations.length > 0) {
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role !== 'assistant') return prev;
+              return [...prev.slice(0, -1), { ...last, citations: finalCitations }];
+            });
+          }
+        } else if (event.type === 'error') {
+          setMessages(prev => [...prev, { role: 'assistant', content: event.message }]);
+          return;
+        }
       }
 
-      // 流式结束后，延迟 reload 获取持久化 ID
       await new Promise(resolve => setTimeout(resolve, 500));
       await loadMessages();
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { role: 'assistant', content: '抱歉，出错了。' }]);
+    } finally {
+      setRetrieving(false);
     }
   };
 
@@ -96,12 +113,18 @@ export function ChatBox({ user, conversation }: ChatBoxProps) {
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {retrieving && (
+          <div className="flex justify-start">
+            <div className="text-xs text-zinc-400 px-3 py-1 bg-zinc-50 rounded-full border border-zinc-200">
+              检索知识库中…
+            </div>
+          </div>
+        )}
         {messages.map((m, index) => (
           <div
             key={index}
-            className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}
           >
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 whitespace-pre-wrap group relative ${
@@ -120,12 +143,20 @@ export function ChatBox({ user, conversation }: ChatBoxProps) {
                 </button>
               )}
             </div>
+            {m.citations && m.citations.length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1 max-w-[80%]">
+                {m.citations.map((c, i) => (
+                  <span key={i} className="text-xs text-zinc-400 bg-zinc-50 border border-zinc-200 rounded px-2 py-0.5">
+                    {c.doc_name} §{c.chunk_index + 1}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-200 flex gap-2">
         <input
           value={input}
@@ -144,3 +175,4 @@ export function ChatBox({ user, conversation }: ChatBoxProps) {
     </div>
   );
 }
+

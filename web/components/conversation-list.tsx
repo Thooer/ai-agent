@@ -28,7 +28,7 @@ export function ConversationList({ user, currentId, onSelect }: ConversationList
   const loadConversations = async () => {
     if (!user) return;
     try {
-      const data = await fetchConversations(user.id);
+      const data = await fetchConversations();
       setConversations(data);
     } catch (error) {
       console.error('Failed to load conversations:', error);
@@ -38,7 +38,7 @@ export function ConversationList({ user, currentId, onSelect }: ConversationList
   const handleCreate = async () => {
     if (!user) return;
     try {
-      const conv = await createConversation({ user_id: user.id });
+      const conv = await createConversation({});
       setConversations([conv, ...conversations]);
       onSelect(conv);
     } catch {
