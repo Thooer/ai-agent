@@ -1,4 +1,4 @@
-const PYTHON_API = process.env.PYTHON_API_URL || 'http://localhost:8000';
+const PYTHON_API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export type User = { id: string; name: string; email: string; created_at: string };
 export type Conversation = { id: string; user_id: string; title: string; created_at: string };
